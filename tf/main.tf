@@ -80,7 +80,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "default" {
 
 
 resource "azurerm_postgresql_flexible_server" "default" {
-  name                   = "tb-postgres-server-usin5g"
+  name                   = "leuphana-postgres-server-usin5g"
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "12" # postgres version to use
@@ -166,6 +166,17 @@ resource "azurerm_network_security_group" "thingsboard_nsg" {
   security_rule {
     name                       = "HTTPS"
     priority                   = 340
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+  security_rule {
+    name                       = "SMTP"
+    priority                   = 350
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"

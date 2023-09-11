@@ -25,3 +25,5 @@ terraform init
 terraform plan -out "main.tfplan" -var-file="<PATH-TO-YOU-TFVARS-FILE>"
 terraform apply "main.tfplan"
 ```
+
+After that, the thingsboard platform is available on the assigned IP on port 8080 and the MQTT Broker on the same IP on port 1883.

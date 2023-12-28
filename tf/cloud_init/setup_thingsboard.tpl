@@ -22,6 +22,7 @@ export SPRING_DATASOURCE_USERNAME=${postgres_user}
 export SPRING_DATASOURCE_PASSWORD=${postgres_pw}
 # Specify partitioning size for timestamp key-value storage. Allowed values: DAYS, MONTHS, YEARS, INDEFINITE.
 export SQL_POSTGRES_TS_KV_PARTITIONING=MONTHS
+export HTTP_BIND_PORT=80
 EOT
 
 sudo tee -a /etc/thingsboard/conf/thingsboard.conf > /dev/null <<EOT

@@ -1,12 +1,21 @@
+resource "random_pet" "rg_name" {
+  prefix = "usin5g-group"
+}
+
 resource "azurerm_resource_group" "rg" {
-  name     = "thingsboard_group"
+  name     = random_pet.rg_name.id
   location = "westeurope"
+}
+
+resource "random_integer" "rd_num" {
+  min = 1
+  max = 50000
 }
 
 
 # Create virtual network
 resource "azurerm_virtual_network" "vnet" {
-  name                = "thingsboard-vnet"
+  name                = "usin5g-tb-vnet-${random_integer.rd_num.result}"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -19,7 +28,7 @@ resource "azurerm_virtual_network" "vnet" {
 # -----------------------------------------------------------------------
 
 resource "azurerm_network_security_group" "default" {
-  name                = "postgres-dns-nsg"
+  name                = "postgres-dns-nsg-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -40,7 +49,7 @@ resource "azurerm_network_security_group" "default" {
 
 # Create subnet
 resource "azurerm_subnet" "postgres_subnet" {
-  name                 = "postgres-subnet"
+  name                 = "usin5g-postgres-subnet-${random_integer.rd_num.result}"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
@@ -72,7 +81,7 @@ resource "azurerm_private_dns_zone" "default" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "default" {
-  name                  = "usin5g-pdzvnetlink.com"
+  name                  = "usin5g-pdzvnetlink-${random_integer.rd_num.result}.com"
   private_dns_zone_name = azurerm_private_dns_zone.default.name
   virtual_network_id    = azurerm_virtual_network.vnet.id
   resource_group_name   = azurerm_resource_group.rg.name
@@ -80,7 +89,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "default" {
 
 
 resource "azurerm_postgresql_flexible_server" "default" {
-  name                   = "leuphana-postgres-server-usin5g"
+  name                   = "usin5g-database-server-${random_integer.rd_num.result}"
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "12" # postgres version to use
@@ -101,7 +110,7 @@ resource "azurerm_postgresql_flexible_server" "default" {
 
 # Create subnet
 resource "azurerm_subnet" "subnet" {
-  name                 = "thingsboard-subnet"
+  name                 = "thingsboard-subnet-${random_integer.rd_num.result}"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
@@ -111,14 +120,14 @@ resource "azurerm_subnet" "subnet" {
 
 # Create public IPs
 resource "azurerm_public_ip" "thingsboard_public_ip" {
-  name                = "thingsboard-ip"
+  name                = "usin5g-tb-ip-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_public_ip" "broker_public_ip" {
-  name                = "broker-ip"
+  name                = "usin5g-broker-ip-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Dynamic"
@@ -127,7 +136,7 @@ resource "azurerm_public_ip" "broker_public_ip" {
 
 # Create Network Security Group and rule
 resource "azurerm_network_security_group" "thingsboard_nsg" {
-  name                = "thingsboard-security-group"
+  name                = "usin5g-thingsboard-security-group-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   security_rule {
@@ -148,7 +157,7 @@ resource "azurerm_network_security_group" "thingsboard_nsg" {
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_ranges    = [80, 8080]
+    destination_port_ranges    = [80, 8080, 5000]
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
@@ -189,12 +198,12 @@ resource "azurerm_network_security_group" "thingsboard_nsg" {
 
 # Create network interface
 resource "azurerm_network_interface" "thingsboard_nic" {
-  name                = "thingsboard_nic"
+  name                = "usin5g-tb-nic-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "nic_configuration_thingsboard"
+    name                          = "nic-configuration-thingsboard-${random_integer.rd_num.result}"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.thingsboard_public_ip.id
@@ -202,12 +211,12 @@ resource "azurerm_network_interface" "thingsboard_nic" {
 }
 
 resource "azurerm_network_interface" "broker_nic" {
-  name                = "broker_nic"
+  name                = "usin5g-broker-nic-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "nic_configuration_broker"
+    name                          = "nic-configuration-broker-${random_integer.rd_num.result}"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.broker_public_ip.id
@@ -247,14 +256,14 @@ locals {
 
 # Create virtual machine
 resource "azurerm_linux_virtual_machine" "rabbitmq" {
-  name                  = "rabbitmq"
+  name                  = "usin5g-rabbitmq-${random_integer.rd_num.result}"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.broker_nic.id]
   size                  = "Standard_B1s"
 
   os_disk {
-    name                 = "rabbit_osdisk"
+    name                 = "rabbit-osdisk-${random_integer.rd_num.result}"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }
@@ -297,14 +306,14 @@ locals {
 
 # Create virtual machine
 resource "azurerm_linux_virtual_machine" "thingsboard" {
-  name                  = "thingsboard"
+  name                  = "usin5g-thingsboard-${random_integer.rd_num.result}"
   location              = azurerm_resource_group.rg.location
   resource_group_name   = azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.thingsboard_nic.id]
   size                  = "Standard_B2s"
 
   os_disk {
-    name                 = "thingsboard_osdisk"
+    name                 = "thingsboard-osdisk-${random_integer.rd_num.result}"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }

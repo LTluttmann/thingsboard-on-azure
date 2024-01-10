@@ -4,7 +4,7 @@ resource "random_pet" "rg_name" {
 
 resource "azurerm_resource_group" "rg" {
   name     = random_pet.rg_name.id
-  location = "westeurope"
+  location = "germanywestcentral"
 }
 
 resource "random_integer" "rd_num" {
@@ -123,14 +123,14 @@ resource "azurerm_public_ip" "thingsboard_public_ip" {
   name                = "usin5g-tb-ip-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 resource "azurerm_public_ip" "broker_public_ip" {
   name                = "usin5g-broker-ip-${random_integer.rd_num.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 
@@ -291,6 +291,7 @@ locals {
     {
       postgres_server_name = azurerm_postgresql_flexible_server.default.name
       rabbit_host          = azurerm_linux_virtual_machine.rabbitmq.private_ip_address
+      server_dns_or_ip     = azurerm_public_ip.thingsboard_public_ip.ip_address
       postgres_user        = var.psql_user
       postgres_pw          = var.psql_pw
       rabbitmq_user        = var.rabbitmq_user    
